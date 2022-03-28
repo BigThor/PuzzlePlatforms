@@ -28,7 +28,7 @@ void AMovingPlatform::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	if (HasAuthority())
+	if (HasAuthority() && ActiveTriggerCount > 0)
 	{
 		AddActorWorldOffset(MoveDirection * Speed * DeltaSeconds);
 
@@ -41,4 +41,15 @@ void AMovingPlatform::Tick(float DeltaSeconds)
 			MoveDirection = (EndLocation - StartLocation).GetSafeNormal();
 		}
 	}
+}
+
+
+void AMovingPlatform::AddActiveTrigger()
+{
+	ActiveTriggerCount++;
+}
+
+void AMovingPlatform::RemoveActiveTrigger()
+{
+	ActiveTriggerCount--;
 }

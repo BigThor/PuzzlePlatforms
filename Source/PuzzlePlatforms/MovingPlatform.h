@@ -24,6 +24,9 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 
 
+	void AddActiveTrigger();
+	void RemoveActiveTrigger();
+
 private:
 	UPROPERTY(EditAnywhere, Category = "Movement")
 	float Speed;
@@ -35,4 +38,7 @@ private:
 	FVector MoveDirection;
 	float PathDistance;
 	
+	UPROPERTY(EditAnywhere)
+	int ActiveTriggerCount = 1;
+
 };
