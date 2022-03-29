@@ -40,6 +40,20 @@ void UPuzzlePlatformsGameInstance::LoadMenu()
 	}
 
 	Menu->AddToViewport();
+	Menu->bIsFocusable = true;
+
+	APlayerController* PlayerController = GetFirstLocalPlayerController();
+	if (!IsValid(PlayerController))
+	{
+		return;
+	}
+
+	FInputModeUIOnly UIModeData;
+	UIModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+	UIModeData.SetWidgetToFocus(Menu->TakeWidget());
+
+	PlayerController->SetInputMode(UIModeData);
+	PlayerController->bShowMouseCursor = true;
 }
 
 void UPuzzlePlatformsGameInstance::Host()
@@ -72,7 +86,6 @@ void UPuzzlePlatformsGameInstance::Join(const FString& IPAdress)
 	Engine->AddOnScreenDebugMessage(0, 5, FColor::Green, FString::Printf(TEXT("Joining adress %s"), *IPAdress));
 
 	APlayerController* PlayerController = GetFirstLocalPlayerController();
-
 	if (!IsValid(PlayerController))
 	{
 		return;
