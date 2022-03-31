@@ -3,15 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
-#include "MenuInterface.h"
+#include "BaseMenu.h"
 #include "MainMenu.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PUZZLEPLATFORMS_API UMainMenu : public UUserWidget
+class PUZZLEPLATFORMS_API UMainMenu : public UBaseMenu
 {
 	GENERATED_BODY()
 
@@ -19,14 +18,18 @@ protected:
 	virtual bool Initialize();
 	virtual void OnLevelRemovedFromWorld(ULevel* InLevel, UWorld* InWorld) override;
 
-public:
-	void SetMenuInterface(IMenuInterface* MenuToSet);
-
-	void Setup();
-
 private:
 	UFUNCTION()
-	void Host();
+	void HostServer();
+	UFUNCTION()
+	void JoinServer();
+	UFUNCTION()
+	void QuitGame();
+
+	UFUNCTION()
+	void ShowMainMenu();
+	UFUNCTION()
+	void ShowJoinMenu();
 
 
 private:
@@ -34,6 +37,22 @@ private:
 	class UButton* HostButton;
 	UPROPERTY(meta = (BindWidget))
 	class UButton* JoinButton;
+	UPROPERTY(meta = (BindWidget))
+	class UButton* CancelButton;
+	UPROPERTY(meta = (BindWidget))
+	class UButton* ShowJoinMenuButton;
+	UPROPERTY(meta = (BindWidget))
+	class UButton* QuitGameButton;
 
-	IMenuInterface* MenuInterface;
+	UPROPERTY(meta = (BindWidget))
+	class UWidgetSwitcher* MenuSwitcher;
+
+	UPROPERTY(meta = (BindWidget))
+	class UWidget* JoinMenu;
+	UPROPERTY(meta = (BindWidget))
+	class UWidget* MainMenu;
+
+	UPROPERTY(meta = (BindWidget))
+	class UEditableTextBox* IPAddressField;
+
 };
