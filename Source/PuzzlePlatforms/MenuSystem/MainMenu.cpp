@@ -66,7 +66,6 @@ void UMainMenu::HostServer()
 	}
 
 	MenuInterface->Host();
-	UE_LOG(LogTemp, Warning, TEXT("I am hosting a game!"));
 }
 
 void UMainMenu::JoinServer()
