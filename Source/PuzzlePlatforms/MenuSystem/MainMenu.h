@@ -31,6 +31,7 @@ private:
 	UFUNCTION()
 	void ShowJoinMenu();
 
+	void CreateScrollTextRow(const FText TextToUse);
 
 private:
 	UPROPERTY(meta = (BindWidget))
@@ -53,6 +54,8 @@ private:
 	class UWidget* MainMenu;
 
 	UPROPERTY(meta = (BindWidget))
-	class UEditableTextBox* IPAddressField;
+	class UScrollBox* ServersScrollBox;
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class UScrollRow> ScrollRowWidgetClass;
 
 };

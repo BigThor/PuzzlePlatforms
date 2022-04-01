@@ -3,10 +3,11 @@
 
 #include "MainMenu.h"
 #include "MenuInterface.h"
+#include "ScrollRow.h"
 
 #include "Components/Button.h"
 #include "Components/WidgetSwitcher.h"
-#include "Components/EditableTextBox.h"
+#include "Components/ScrollBox.h"
 
 bool UMainMenu::Initialize()
 {
@@ -74,14 +75,13 @@ void UMainMenu::JoinServer()
 	{
 		return;
 	}
-	if (!IsValid(IPAddressField))
+	/*if (!IsValid(IPAddressField))
 	{
 		return;
-	}
+	}*/
 
-	const FString IPAddress = IPAddressField->GetText().ToString();
-	MenuInterface->Join(IPAddress);
-	UE_LOG(LogTemp, Warning, TEXT("I am hosting a game!"));
+	//const FString IPAddress = IPAddressField->GetText().ToString();
+	//MenuInterface->Join(IPAddress);
 }
 
 void UMainMenu::QuitGame()
@@ -116,6 +116,43 @@ void UMainMenu::ShowJoinMenu()
 	{
 		return;
 	}
-
 	MenuSwitcher->SetActiveWidget(JoinMenu);
+
+	if (!IsValid(ServersScrollBox))
+	{
+		return;
+	}
+	ServersScrollBox->ClearChildren();
+
+	// Loop for testing scrollbox
+	for (int i = 0; i < 20; i++)
+	{
+		FString string = FString::Printf(TEXT("Row %d"), i);
+		FText text = FText::FromString(string);
+		CreateScrollTextRow(text);
+	}
+}
+
+void UMainMenu::CreateScrollTextRow(const FText TextToUse)
+{
+	if (ScrollRowWidgetClass == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Add a value to ScrollRowWidgetClass in MainMenu BP"));
+		return;
+	}
+	if (!IsValid(ServersScrollBox))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Could not find scroll box"));
+		return;
+	}
+
+	UScrollRow* NewRow = CreateWidget<UScrollRow>(this, ScrollRowWidgetClass);
+	if (!IsValid(NewRow))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Could not add row to scrollbox"));
+		return;
+	}
+	NewRow->SetText(TextToUse);
+
+	ServersScrollBox->AddChild(NewRow);
 }
