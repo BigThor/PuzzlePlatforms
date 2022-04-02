@@ -18,6 +18,10 @@ protected:
 	virtual bool Initialize();
 	virtual void OnLevelRemovedFromWorld(ULevel* InLevel, UWorld* InWorld) override;
 
+public:
+	void SetServersList(TArray<FString> ServerNames);
+	void SetSelectedIndex(uint32 Index);
+
 private:
 	UFUNCTION()
 	void HostServer();
@@ -31,7 +35,7 @@ private:
 	UFUNCTION()
 	void ShowJoinMenu();
 
-	void CreateScrollTextRow(const FText TextToUse);
+	void CreateScrollTextRow(const FText TextToUse, int32 Index);
 
 private:
 	UPROPERTY(meta = (BindWidget))
@@ -58,4 +62,5 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class UScrollRow> ScrollRowWidgetClass;
 
+	TOptional<uint32> SelectedIndex;
 };

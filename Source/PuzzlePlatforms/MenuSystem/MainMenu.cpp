@@ -59,6 +59,28 @@ void UMainMenu::OnLevelRemovedFromWorld(ULevel* InLevel, UWorld* InWorld)
 	Teardown();
 }
 
+void UMainMenu::SetServersList(TArray<FString> ServerNames)
+{
+	if (!IsValid(ServersScrollBox))
+	{
+		return;
+	}
+	ServersScrollBox->ClearChildren();
+
+	// Loop for testing scrollbox
+	int32 CurrentIndex = 0;
+	for (const FString& ServerName : ServerNames)
+	{
+		CreateScrollTextRow(FText::FromString(ServerName), CurrentIndex);
+		++CurrentIndex;
+	}
+}
+
+void UMainMenu::SetSelectedIndex(uint32 Index)
+{
+	SelectedIndex = Index;
+}
+
 void UMainMenu::HostServer()
 {
 	if (MenuInterface == nullptr)
@@ -75,13 +97,14 @@ void UMainMenu::JoinServer()
 	{
 		return;
 	}
-	/*if (!IsValid(IPAddressField))
-	{
-		return;
-	}*/
 
-	//const FString IPAddress = IPAddressField->GetText().ToString();
-	//MenuInterface->Join(IPAddress);
+	if (!SelectedIndex.IsSet())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("There was no index selected"));
+		return;
+	}
+	UE_LOG(LogTemp, Warning, TEXT("Selected index is %d"), SelectedIndex.GetValue());
+	MenuInterface->Join(SelectedIndex.GetValue());
 }
 
 void UMainMenu::QuitGame()
@@ -118,22 +141,14 @@ void UMainMenu::ShowJoinMenu()
 	}
 	MenuSwitcher->SetActiveWidget(JoinMenu);
 
-	if (!IsValid(ServersScrollBox))
+	if (MenuInterface == nullptr)
 	{
 		return;
 	}
-	ServersScrollBox->ClearChildren();
-
-	// Loop for testing scrollbox
-	for (int i = 0; i < 20; i++)
-	{
-		FString string = FString::Printf(TEXT("Row %d"), i);
-		FText text = FText::FromString(string);
-		CreateScrollTextRow(text);
-	}
+	MenuInterface->FindAvailableSession();
 }
 
-void UMainMenu::CreateScrollTextRow(const FText TextToUse)
+void UMainMenu::CreateScrollTextRow(const FText TextToUse, int32 Index)
 {
 	if (ScrollRowWidgetClass == nullptr)
 	{
@@ -152,6 +167,7 @@ void UMainMenu::CreateScrollTextRow(const FText TextToUse)
 		UE_LOG(LogTemp, Warning, TEXT("Could not add row to scrollbox"));
 		return;
 	}
+	NewRow->Setup(this, Index);
 	NewRow->SetText(TextToUse);
 
 	ServersScrollBox->AddChild(NewRow);

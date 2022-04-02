@@ -7,8 +7,6 @@
 #include "Blueprint/UserWidget.h"
 #include "UObject/ConstructorHelpers.h"
 #include "OnlineSessionSettings.h"
-#include "Interfaces/OnlineSessionInterface.h"
-
 #include "MenuSystem/MainMenu.h"
 #include "MenuSystem/GameMenu.h"
 
@@ -43,29 +41,24 @@ void UPuzzlePlatformsGameInstance::Init()
 		return;
 	}
 
+	UE_LOG(LogTemp, Warning, TEXT("The online subsystem is: %s"), *OnlineSubsystem->GetSubsystemName().ToString());
+
 	SessionInterfacePtr = OnlineSubsystem->GetSessionInterface();
 	if (!SessionInterfacePtr.IsValid())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Session pointer is not Valid"));
 		return;
 	}
-	UE_LOG(LogTemp, Warning, TEXT("Setting up delegate"));
+
+	UE_LOG(LogTemp, Warning, TEXT("Setting up delegates"));
 	SessionInterfacePtr->OnCreateSessionCompleteDelegates.AddUObject(
 		this, &UPuzzlePlatformsGameInstance::OnCreateSessionComplete);
 	SessionInterfacePtr->OnDestroySessionCompleteDelegates.AddUObject(
 		this, &UPuzzlePlatformsGameInstance::OnDestroySessionComplete);
 	SessionInterfacePtr->OnFindSessionsCompleteDelegates.AddUObject(
 		this, &UPuzzlePlatformsGameInstance::OnFindSessionsComplete);
-
-	
-	SessionSearch = MakeShareable(new FOnlineSessionSearch());
-	if (SessionSearch.IsValid())
-	{
-		SessionSearch->bIsLanQuery = true;
-		SessionInterfacePtr->FindSessions(0, SessionSearch.ToSharedRef());
-		UE_LOG(LogTemp, Warning, TEXT("Find Sessions started"));
-	}
-
+	SessionInterfacePtr->OnJoinSessionCompleteDelegates.AddUObject(
+		this, &UPuzzlePlatformsGameInstance::OnJoinSessionComplete);
 }
 
 void UPuzzlePlatformsGameInstance::LoadMainMenu()
@@ -74,7 +67,7 @@ void UPuzzlePlatformsGameInstance::LoadMainMenu()
 	{
 		return;
 	}
-	UMainMenu* MainMenu = CreateWidget<UMainMenu>(this, MainMenuClass);
+	MainMenu = CreateWidget<UMainMenu>(this, MainMenuClass);
 
 	if (!IsValid(MainMenu))
 	{
@@ -120,9 +113,20 @@ void UPuzzlePlatformsGameInstance::Host()
 	}
 }
 
-void UPuzzlePlatformsGameInstance::Join(const FString& IPAdress)
+void UPuzzlePlatformsGameInstance::Join(uint32 Index)
 {
-	UEngine* Engine = GetEngine();
+	if (!SessionInterfacePtr.IsValid())
+	{
+		return;
+	}
+	if (!SessionSearch.IsValid())
+	{
+		return;
+	}
+	FOnlineSessionSearchResult SelectedResult = SessionSearch->SearchResults[Index];
+	SessionInterfacePtr->JoinSession(0, SESSION_NAME, SelectedResult);
+
+	/*UEngine* Engine = GetEngine();
 	if (!IsValid(Engine))
 	{
 		return;
@@ -135,7 +139,7 @@ void UPuzzlePlatformsGameInstance::Join(const FString& IPAdress)
 		return;
 	}
 
-	PlayerController->ClientTravel(IPAdress, ETravelType::TRAVEL_Absolute);
+	PlayerController->ClientTravel(IPAdress, ETravelType::TRAVEL_Absolute);*/
 }
 
 void UPuzzlePlatformsGameInstance::ReturnToMenu()
@@ -147,6 +151,17 @@ void UPuzzlePlatformsGameInstance::ReturnToMenu()
 	}
 
 	PlayerController->ClientTravel("/Game/MenuSystem/MainMenuLevel", ETravelType::TRAVEL_Absolute);
+}
+
+void UPuzzlePlatformsGameInstance::FindAvailableSession()
+{
+	SessionSearch = MakeShareable(new FOnlineSessionSearch());
+	if (SessionSearch.IsValid())
+	{
+		SessionSearch->bIsLanQuery = true;
+		SessionInterfacePtr->FindSessions(0, SessionSearch.ToSharedRef());
+		UE_LOG(LogTemp, Warning, TEXT("Find Sessions started"));
+	}
 }
 
 void UPuzzlePlatformsGameInstance::CreateSession()
@@ -214,14 +229,58 @@ void UPuzzlePlatformsGameInstance::OnFindSessionsComplete(bool bSuccess)
 
 	if (SessionSearch->SearchResults.Num() > 0)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Found the following sessions:"));
+		TArray<FString> SessionNameResults;
 		for (const FOnlineSessionSearchResult& SearchResult : SessionSearch->SearchResults)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("%s"), *SearchResult.Session.GetSessionIdStr());
+			SessionNameResults.Add(SearchResult.Session.GetSessionIdStr());
 		}
+
+		if (!IsValid(MainMenu))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Main Menu Widget does not exist"));
+			return;
+		}
+		MainMenu->SetServersList(SessionNameResults);
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("No Sessions Were Found :("));
+		UE_LOG(LogTemp, Warning, TEXT("No Sessions Were Found"));
+	}
+}
+
+void UPuzzlePlatformsGameInstance::OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result)
+{
+	if (!SessionInterfacePtr.IsValid())
+	{
+		return;
+	}
+
+	FString ConnectInformation;
+	switch (Result)
+	{
+		case EOnJoinSessionCompleteResult::Success:
+			if (SessionInterfacePtr->GetResolvedConnectString(SessionName, ConnectInformation) == true)
+			{
+				APlayerController* PlayerController = GetFirstLocalPlayerController();
+				if (!IsValid(PlayerController))
+				{
+					break;
+				}
+				PlayerController->ClientTravel(ConnectInformation, ETravelType::TRAVEL_Absolute);
+			}
+
+			break;
+		case EOnJoinSessionCompleteResult::SessionIsFull:
+			break;
+		case EOnJoinSessionCompleteResult::SessionDoesNotExist:
+			break;
+		case EOnJoinSessionCompleteResult::CouldNotRetrieveAddress:
+			break;
+		case EOnJoinSessionCompleteResult::AlreadyInSession:
+			break;
+		case EOnJoinSessionCompleteResult::UnknownError:
+			break;
+		default:
+			break;
 	}
 }
