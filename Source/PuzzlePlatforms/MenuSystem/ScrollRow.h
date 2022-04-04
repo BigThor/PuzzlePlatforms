@@ -18,19 +18,31 @@ protected:
 	bool Initialize() override;
 	
 public:
-	void SetText(const FText TextToSet);
+	void SetServerNameText(const FText TextToSet);
+	void SetUserNameText(const FText TextToSet);
+	void SetPlayerCountText(const FText TextToSet); 
+
 	void Setup(class UMainMenu* MainMenuWidget, int32 RowIndex);
+	int32 GetIndex();
 
 private:
 	UFUNCTION()
 	void UpdateMainMenuIndex();
 
+public:
+	UPROPERTY(BlueprintReadOnly)
+	bool bIsSelected = false;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	class UButton* RowButton;
+
 private:
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* ServerNameText;
-
 	UPROPERTY(meta = (BindWidget))
-	class UButton* RowButton;
+	class UTextBlock* UserNameText;
+	UPROPERTY(meta = (BindWidget))
+	class UTextBlock* PlayerCountText;
+
 
 	UPROPERTY()
 	class UMainMenu* MainMenu;

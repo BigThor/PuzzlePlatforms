@@ -24,7 +24,7 @@ bool UScrollRow::Initialize()
 	return true;
 }
 
-void UScrollRow::SetText(const FText TextToSet)
+void UScrollRow::SetServerNameText(const FText TextToSet)
 {
 	if (!IsValid(ServerNameText))
 	{
@@ -32,6 +32,26 @@ void UScrollRow::SetText(const FText TextToSet)
 	}
 
 	ServerNameText->SetText(TextToSet);
+}
+
+void UScrollRow::SetUserNameText(const FText TextToSet)
+{
+	if (!IsValid(UserNameText))
+	{
+		return;
+	}
+
+	UserNameText->SetText(TextToSet);
+}
+
+void UScrollRow::SetPlayerCountText(const FText TextToSet)
+{
+	if (!IsValid(PlayerCountText))
+	{
+		return;
+	}
+
+	PlayerCountText->SetText(TextToSet);
 }
 
 void UScrollRow::Setup(UMainMenu* MainMenuWidget, int32 RowIndex)
@@ -47,4 +67,9 @@ void UScrollRow::UpdateMainMenuIndex()
 		return;
 	}
 	MainMenu->SetSelectedIndex(Index);
+}
+
+int32 UScrollRow::GetIndex()
+{
+	return Index;
 }

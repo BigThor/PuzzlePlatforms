@@ -59,7 +59,7 @@ void UMainMenu::OnLevelRemovedFromWorld(ULevel* InLevel, UWorld* InWorld)
 	Teardown();
 }
 
-void UMainMenu::SetServersList(TArray<FString> ServerNames)
+void UMainMenu::SetServersList(TArray<FServerData> ServerDataList)
 {
 	if (!IsValid(ServersScrollBox))
 	{
@@ -69,9 +69,9 @@ void UMainMenu::SetServersList(TArray<FString> ServerNames)
 
 	// Loop for testing scrollbox
 	int32 CurrentIndex = 0;
-	for (const FString& ServerName : ServerNames)
+	for (const FServerData& ServerData : ServerDataList)
 	{
-		CreateScrollTextRow(FText::FromString(ServerName), CurrentIndex);
+		CreateScrollTextRow(ServerData, CurrentIndex);
 		++CurrentIndex;
 	}
 }
@@ -79,6 +79,7 @@ void UMainMenu::SetServersList(TArray<FString> ServerNames)
 void UMainMenu::SetSelectedIndex(uint32 Index)
 {
 	SelectedIndex = Index;
+	UpdateSelectedRow();
 }
 
 void UMainMenu::HostServer()
@@ -148,7 +149,7 @@ void UMainMenu::ShowJoinMenu()
 	MenuInterface->FindAvailableSession();
 }
 
-void UMainMenu::CreateScrollTextRow(const FText TextToUse, int32 Index)
+void UMainMenu::CreateScrollTextRow(const FServerData DataToUse, int32 Index)
 {
 	if (ScrollRowWidgetClass == nullptr)
 	{
@@ -168,7 +169,31 @@ void UMainMenu::CreateScrollTextRow(const FText TextToUse, int32 Index)
 		return;
 	}
 	NewRow->Setup(this, Index);
-	NewRow->SetText(TextToUse);
+	NewRow->SetServerNameText(FText::FromString(DataToUse.Name));
+	NewRow->SetUserNameText(FText::FromString(DataToUse.HostUsername));
+	FString PlayerCount;
+	PlayerCount.AppendInt(DataToUse.CurrentPlayers);
+	PlayerCount.AppendChar('/');
+	PlayerCount.AppendInt(DataToUse.MaxPlayers);
+	NewRow->SetPlayerCountText(FText::FromString(PlayerCount));
 
 	ServersScrollBox->AddChild(NewRow);
+}
+
+void UMainMenu::UpdateSelectedRow()
+{
+	if (!SelectedIndex.IsSet())
+	{
+		return;
+	}
+
+	for (UWidget* Child : ServersScrollBox->GetAllChildren())
+	{
+		UScrollRow* Row = Cast<UScrollRow>(Child);
+		if (!IsValid(Row))
+		{
+			continue;
+		}
+		Row->bIsSelected = Row->GetIndex() == SelectedIndex;
+	}
 }

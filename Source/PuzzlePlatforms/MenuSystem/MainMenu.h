@@ -6,6 +6,16 @@
 #include "BaseMenu.h"
 #include "MainMenu.generated.h"
 
+USTRUCT()
+struct FServerData {
+	GENERATED_BODY()
+
+	FString Name;
+	uint16 CurrentPlayers;
+	uint16 MaxPlayers;
+	FString HostUsername;
+};
+
 /**
  * 
  */
@@ -19,7 +29,7 @@ protected:
 	virtual void OnLevelRemovedFromWorld(ULevel* InLevel, UWorld* InWorld) override;
 
 public:
-	void SetServersList(TArray<FString> ServerNames);
+	void SetServersList(TArray<FServerData> ServerDataList);
 	void SetSelectedIndex(uint32 Index);
 
 private:
@@ -35,7 +45,8 @@ private:
 	UFUNCTION()
 	void ShowJoinMenu();
 
-	void CreateScrollTextRow(const FText TextToUse, int32 Index);
+	void CreateScrollTextRow(const FServerData DataToUse, int32 Index);
+	void UpdateSelectedRow();
 
 private:
 	UPROPERTY(meta = (BindWidget))
