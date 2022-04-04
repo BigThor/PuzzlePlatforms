@@ -8,6 +8,7 @@
 #include "Components/Button.h"
 #include "Components/WidgetSwitcher.h"
 #include "Components/ScrollBox.h"
+#include "Components/EditableTextBox.h"
 
 bool UMainMenu::Initialize()
 {
@@ -30,18 +31,30 @@ bool UMainMenu::Initialize()
 	}
 	JoinButton->OnClicked.AddDynamic(this, &UMainMenu::JoinServer);
 
+	if (!IsValid(ShowHostMenuButton))
+	{
+		return false;
+	}
+	ShowHostMenuButton->OnClicked.AddDynamic(this, &UMainMenu::ShowHostMenu);
+
 	if (!IsValid(ShowJoinMenuButton))
 	{
 		return false;
 	}
 	ShowJoinMenuButton->OnClicked.AddDynamic(this, &UMainMenu::ShowJoinMenu);
 
-
-	if (!IsValid(CancelButton))
+	if (!IsValid(HostMenuReturnToMainButton))
 	{
 		return false;
 	}
-	CancelButton->OnClicked.AddDynamic(this, &UMainMenu::ShowMainMenu);
+	HostMenuReturnToMainButton->OnClicked.AddDynamic(this, &UMainMenu::ShowMainMenu);
+
+
+	if (!IsValid(JoinMenuReturnToMainButton))
+	{
+		return false;
+	}
+	JoinMenuReturnToMainButton->OnClicked.AddDynamic(this, &UMainMenu::ShowMainMenu);
 
 	if (!IsValid(QuitGameButton))
 	{
@@ -88,8 +101,12 @@ void UMainMenu::HostServer()
 	{
 		return;
 	}
+	if (!IsValid(ServerNameField))
+	{
+		return;
+	}
 
-	MenuInterface->Host();
+	MenuInterface->Host(FName(ServerNameField->GetText().ToString()));
 }
 
 void UMainMenu::JoinServer()
@@ -132,6 +149,16 @@ void UMainMenu::ShowMainMenu()
 	}
 
 	MenuSwitcher->SetActiveWidget(MainMenu);
+}
+
+void UMainMenu::ShowHostMenu()
+{
+	if (!IsValid(MenuSwitcher))
+	{
+		return;
+	}
+
+	MenuSwitcher->SetActiveWidget(HostMenu);
 }
 
 void UMainMenu::ShowJoinMenu()

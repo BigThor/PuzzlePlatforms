@@ -28,14 +28,14 @@ public:
 	void LoadGameMenu();
 
 	UFUNCTION(Exec)
-	void Host() override;
+	void Host(FName ServerName) override;
 	UFUNCTION(Exec)
 	void Join(uint32 Index) override;
 	void ReturnToMenu() override;
 	void FindAvailableSession() override;
 
 private:
-	void CreateSession();
+	void CreateSession(FName ServerName);
 	void OnCreateSessionComplete(FName SessionName, bool bSuccess);
 	void OnDestroySessionComplete(FName SessionName, bool bSuccess);
 	void OnFindSessionsComplete(bool bSuccess);

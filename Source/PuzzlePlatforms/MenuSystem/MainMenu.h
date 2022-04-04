@@ -43,6 +43,8 @@ private:
 	UFUNCTION()
 	void ShowMainMenu();
 	UFUNCTION()
+	void ShowHostMenu();
+	UFUNCTION()
 	void ShowJoinMenu();
 
 	void CreateScrollTextRow(const FServerData DataToUse, int32 Index);
@@ -54,7 +56,11 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	class UButton* JoinButton;
 	UPROPERTY(meta = (BindWidget))
-	class UButton* CancelButton;
+	class UButton* HostMenuReturnToMainButton;
+	UPROPERTY(meta = (BindWidget))
+	class UButton* JoinMenuReturnToMainButton;
+	UPROPERTY(meta = (BindWidget))
+	class UButton* ShowHostMenuButton;
 	UPROPERTY(meta = (BindWidget))
 	class UButton* ShowJoinMenuButton;
 	UPROPERTY(meta = (BindWidget))
@@ -67,6 +73,11 @@ private:
 	class UWidget* JoinMenu;
 	UPROPERTY(meta = (BindWidget))
 	class UWidget* MainMenu;
+	UPROPERTY(meta = (BindWidget))
+	class UWidget* HostMenu;
+
+	UPROPERTY(meta = (BindWidget))
+	class UEditableTextBox* ServerNameField;
 
 	UPROPERTY(meta = (BindWidget))
 	class UScrollBox* ServersScrollBox;
