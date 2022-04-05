@@ -197,7 +197,7 @@ void UPuzzlePlatformsGameInstance::OnCreateSessionComplete(FName SessionName, bo
 			return;
 		}
 
-		World->ServerTravel("/Game/PuzzlePlatforms/Maps/ThirdPersonExampleMap?listen");
+		World->ServerTravel("/Game/PuzzlePlatforms/Maps/Lobby?listen");
 	}
 	else
 	{
